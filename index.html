@@ -131,7 +131,7 @@ let dados = JSON.parse(localStorage.getItem('almDados') || '[]');
 const COR = {pendente:'#ffc107',realizado:'#198754',interrompido:'#dc3545'};
 let charts = {};
 
-function aba(x){
+ion aba(x){
     ['G','P'].forEach(k=>{
         document.getElementById('pg'+k).classList.toggle('d-none',k!==x);
         document.getElementById('tab'+k).classList.toggle('active',k===x);
@@ -344,6 +344,132 @@ function exportarPDF(){
     doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + '  |  Total: ' + dados.length,14,20);
     doc.autoTable({head:[CABECALHO],body:linhasExport(),startY:25,styles:{fontSize:8},headStyles:{fillColor:[13,110,253]}});
     doc.save(nomeArquivo('pdf'));
+}
+
+  function importarCSV(event){
+
+    const arquivo = event.target.files[0];
+
+    if(!arquivo){
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        try{
+
+            const texto =
+                e.target.result
+                .replace(/^\uFEFF/,'');
+
+            const linhas =
+                texto
+                .split(/\r?\n/)
+                .filter(l => l.trim());
+
+            if(linhas.length <= 1){
+
+                alert(
+                    'O arquivo não possui registros.'
+                );
+
+                return;
+            }
+
+            const novosDados = [];
+
+            for(let i = 1; i < linhas.length; i++){
+
+                const colunas =
+                    linhas[i]
+                    .split(';')
+                    .map(item =>
+                        item
+                        .replace(/^"/,'')
+                        .replace(/"$/,'')
+                        .replace(/""/g,'"')
+                    );
+
+                if(colunas.length < 5){
+                    continue;
+                }
+
+                novosDados.push({
+
+                    csp: colunas[0],
+
+                    data: colunas[1],
+
+                    criacao: colunas[2],
+
+                    execucao: colunas[3],
+
+                    motivo: colunas[4]
+
+                });
+
+            }
+
+            if(novosDados.length === 0){
+
+                alert(
+                    'Nenhum registro encontrado.'
+                );
+
+                return;
+            }
+
+            if(confirm(
+
+                'Importar ' +
+
+                novosDados.length +
+
+                ' registros?\n\n' +
+
+                'Os dados atuais serão substituídos.'
+
+            )){
+
+                dados = novosDados;
+
+                localStorage.setItem(
+                    'almDados',
+                    JSON.stringify(dados)
+                );
+
+                render();
+
+                alert(
+
+                    novosDados.length +
+
+                    ' registros importados com sucesso.'
+
+                );
+
+            }
+
+        }
+        catch(erro){
+
+            console.error(erro);
+
+            alert(
+                'Erro ao importar CSV.'
+            );
+
+        }
+
+    };
+
+    reader.readAsText(
+        arquivo,
+        'UTF-8'
+    );
+
 }
 
 document.getElementById('csp').addEventListener('keydown',function(e){
