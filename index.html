@@ -414,9 +414,7 @@ function importarCSV(event){
 
             if(linhas.length <= 1){
 
-                alert(
-                    'Arquivo CSV vazio.'
-                );
+                alert('Arquivo CSV vazio.');
 
                 return;
             }
@@ -448,29 +446,19 @@ function importarCSV(event){
 
                 novosDados.push({
 
-                    csp:
-                        colunas[0],
+                    csp: colunas[0],
 
-                    data:
-                        colunas[1],
+                    data: colunas[1],
 
-                    criacao:
-                        colunas[2],
+                    criacao: colunas[2],
 
-                    execucao:
-                        colunas[3],
+                    execucao: colunas[3],
 
-                    motivo:
-                        colunas[4]
+                    motivo: colunas[4]
 
                 });
 
             }
-
-            console.log(
-                'Importados:',
-                novosDados
-            );
 
             if(novosDados.length === 0){
 
@@ -488,11 +476,8 @@ function importarCSV(event){
             render();
 
             alert(
-
                 novosDados.length +
-
                 ' registros importados com sucesso.'
-
             );
 
         }
@@ -514,7 +499,6 @@ function importarCSV(event){
     );
 
 }
-
 document.getElementById('csp').addEventListener('keydown',function(e){
     if(e.key === 'Enter'){ e.preventDefault(); addTask(); }
 });
