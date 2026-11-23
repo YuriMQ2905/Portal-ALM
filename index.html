@@ -44,19 +44,56 @@ select{min-width:140px}
 <div class="card mb-4">
   <div class="card-header">Novo CSP</div>
   <div class="card-body">
-    <div class="row md-2">
-      <div class="col-md-1"><input id="csp" class="form-control" placeholder="Digite ou cole um ou mais CSPs"></div>
-      <div class="col-md-2"><button class="btn btn-primary w-10" onclick="addTask()">Adicionar</button></div>
-      <div class="col-md-2"></div>
-    </div>
+<div class="row md-2">
+
+  <div class="col-md-2">
+    <input
+        id="csp"
+        class="form-control"
+        placeholder="Digite ou cole um ou mais CSPs">
   </div>
+
+  <div class="col-md-2">
+    <select
+        id="squad"
+        class="form-select">
+
+        <option value="">
+            Selecione a Squad
+        </option>
+
+        <option>ALM</option>
+        <option>Benefícios</option>
+        <option>Cadastro</option>
+        <option>Financeiro</option>
+        <option>Portal</option>
+        <option>Integrações</option>
+        <option>DevOps</option>
+
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <button
+        class="btn btn-primary"
+        onclick="addTask()">
+
+        Adicionar
+
+    </button>
+  </div>
+
 </div>
 
 <div class="table-responsive">
   <table class="table table-bordered table-hover bg-white">
     <thead class="table-light">
-      <tr>
-        <th>CSP</th><th>Data Inicial</th><th>Criação Plano de Teste</th><th>Execução Plano de Teste</th>
+     <tr>
+
+    <th>CSP</th>
+    <th>Squad</th>
+    <th>Data Inicial</th>
+    <th>Criação Plano de Teste</th><th>Execução Plano de Teste</th>
         <th>Motivo</th><th>Status Geral</th><th width="80">Excluir</th>
       </tr>
     </thead>
@@ -276,8 +313,9 @@ function render(){
 
         tbody.innerHTML += `
         <tr>
-            <td>${item.csp}</td>
-            <td>${item.data}</td>
+          <td>${item.csp}</td>
+    <td>${item.squad || ''}</td>
+    <td>${item.data}</td>
             <td><select class="form-select" onchange="atualizar(${index},'criacao',this.value)">${opcoes(item.criacao)}</select></td>
             <td><select class="form-select" onchange="atualizar(${index},'execucao',this.value)">${opcoes(item.execucao)}</select></td>
             <td><input class="form-control" value="${item.motivo || ''}" onchange="alterarMotivo(${index},this.value)"></td>
@@ -310,14 +348,33 @@ function addTask(){
         csp = csp.trim();
         const existe = dados.some(item => item.csp.toUpperCase() === csp.toUpperCase());
         if(existe){ duplicados.push(csp); return; }
-        dados.push({csp:csp,data:new Date().toLocaleString('pt-BR'),criacao:'Pendente',execucao:'Pendente',motivo:''});
+      dados.push({
+
+    csp:csp,
+
+    squad:
+        document
+        .getElementById('squad')
+        .value,
+
+    data:
+        new Date()
+        .toLocaleString('pt-BR'),
+
+    criacao:'Pendente',
+
+    execucao:'Pendente',
+
+    motivo:''
+      });
     });
 
     if(duplicados.length > 0){
         alert('Os seguintes CSPs já estão cadastrados:\n\n' + duplicados.join('\n'));
     }
 
-    document.getElementById('csp').value='';
+   document.getElementById('csp').value='';
+document.getElementById('squad').value='';
     render();
 }
 
@@ -337,10 +394,26 @@ function excluir(index){
 
 /* ---------- Exportação (CSPs) ---------- */
 
-const CABECALHO = ['CSP','Data Inicial','Criação Plano de Teste','Execução Plano de Teste','Motivo','Status Geral'];
+const CABECALHO = ['CSP','Data Inicial', 'Squad', 'Criação Plano de Teste','Execução Plano de Teste','Motivo','Status Geral'];
 
 function linhasExport(){
-    return dados.map(d => [d.csp,d.data,d.criacao,d.execucao,d.motivo || '',statusGeral(d.criacao,d.execucao)]);
+    return dados.map(d => [
+
+    d.csp,
+
+    d.squad || '',
+
+    d.data,
+
+    d.criacao,
+
+    d.execucao,
+
+    d.motivo || '',
+
+    statusGeral(
+        d.criacao,
+        d.execucao)]);
 }
 
 function nomeArquivo(ext){
@@ -446,15 +519,17 @@ function importarCSV(event){
 
                 novosDados.push({
 
-                    csp: colunas[0],
+                        csp: colunas[0],
 
-                    data: colunas[1],
+    squad: colunas[1],
 
-                    criacao: colunas[2],
+    data: colunas[2],
 
-                    execucao: colunas[3],
+    criacao: colunas[3],
 
-                    motivo: colunas[4]
+    execucao: colunas[4],
+
+    motivo: colunas[5]
 
                 });
 
