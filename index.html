@@ -175,7 +175,7 @@ let dados = JSON.parse(localStorage.getItem('almDados') || '[]');
 const COR = {pendente:'#ffc107',realizado:'#198754',interrompido:'#dc3545'};
 let charts = {};
 
-ion aba(x){
+function aba(x){
     ['G','P'].forEach(k=>{
         document.getElementById('pg'+k).classList.toggle('d-none',k!==x);
         document.getElementById('tab'+k).classList.toggle('active',k===x);
