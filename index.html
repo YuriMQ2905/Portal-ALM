@@ -390,7 +390,7 @@ function exportarPDF(){
     doc.save(nomeArquivo('pdf'));
 }
 
-  function importarCSV(event){
+function importarCSV(event){
 
     const arquivo = event.target.files[0];
 
@@ -409,14 +409,13 @@ function exportarPDF(){
                 .replace(/^\uFEFF/,'');
 
             const linhas =
-                texto
-                .split(/\r?\n/)
+                texto.split(/\r?\n/)
                 .filter(l => l.trim());
 
             if(linhas.length <= 1){
 
                 alert(
-                    'O arquivo não possui registros.'
+                    'Arquivo CSV vazio.'
                 );
 
                 return;
@@ -426,15 +425,22 @@ function exportarPDF(){
 
             for(let i = 1; i < linhas.length; i++){
 
-                const colunas =
-                    linhas[i]
-                    .split(';')
-                    .map(item =>
-                        item
-                        .replace(/^"/,'')
-                        .replace(/"$/,'')
-                        .replace(/""/g,'"')
+                const linha = linhas[i];
+
+                const partes =
+                    linha.match(
+                        /("([^"]|"")*"|[^;]+)/g
                     );
+
+                if(!partes){
+                    continue;
+                }
+
+                const colunas = partes.map(c =>
+                    c.replace(/^"/,'')
+                     .replace(/"$/,'')
+                     .replace(/""/g,'"')
+                );
 
                 if(colunas.length < 5){
                     continue;
@@ -442,67 +448,60 @@ function exportarPDF(){
 
                 novosDados.push({
 
-                    csp: colunas[0],
+                    csp:
+                        colunas[0],
 
-                    data: colunas[1],
+                    data:
+                        colunas[1],
 
-                    criacao: colunas[2],
+                    criacao:
+                        colunas[2],
 
-                    execucao: colunas[3],
+                    execucao:
+                        colunas[3],
 
-                    motivo: colunas[4]
+                    motivo:
+                        colunas[4]
 
                 });
 
             }
 
+            console.log(
+                'Importados:',
+                novosDados
+            );
+
             if(novosDados.length === 0){
 
                 alert(
-                    'Nenhum registro encontrado.'
+                    'Nenhum registro encontrado no CSV.'
                 );
 
                 return;
             }
 
-            if(confirm(
+            dados = novosDados;
 
-                'Importar ' +
+            salvar();
+
+            render();
+
+            alert(
 
                 novosDados.length +
 
-                ' registros?\n\n' +
+                ' registros importados com sucesso.'
 
-                'Os dados atuais serão substituídos.'
-
-            )){
-
-                dados = novosDados;
-
-                localStorage.setItem(
-                    'almDados',
-                    JSON.stringify(dados)
-                );
-
-                render();
-
-                alert(
-
-                    novosDados.length +
-
-                    ' registros importados com sucesso.'
-
-                );
-
-            }
+            );
 
         }
-        catch(erro){
+        catch(ex){
 
-            console.error(erro);
+            console.error(ex);
 
             alert(
-                'Erro ao importar CSV.'
+                'Erro ao processar o arquivo CSV.'
             );
 
         }
