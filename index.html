@@ -113,6 +113,35 @@ const COR = {pendente:'#ffc107', realizado:'#198754', interrompido:'#dc3545'};
 const OPCOES = ['Pendente', 'Realizado', 'Interrompido'];
 let charts = {};
 
+  /* ---------- Conversão de Datas (Banco: AAAA-MM-DD | Tela: DD/MM/AAAA) ---------- */
+function agoraBanco(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function dataParaTela(str){
+  if(!str) return '';
+  const [dataParte, horaParte] = String(str).replace(',', '').replace('T', ' ').trim().split(/\s+/);
+  const segs = (dataParte || '').split(/[-/]/);
+  if(segs.length === 3 && segs[0].length === 4){
+    const dataBR = `${segs[2].padStart(2, '0')}/${segs[1].padStart(2, '0')}/${segs[0]}`;
+    return horaParte ? `${dataBR} ${horaParte.slice(0, 8)}` : dataBR;
+  }
+  return str;
+}
+
+function dataParaBanco(str){
+  if(!str) return null;
+  const [dataParte, horaParte] = String(str).replace(',', '').replace('T', ' ').trim().split(/\s+/);
+  const segs = (dataParte || '').split(/[-/]/);
+  if(segs.length === 3 && segs[2].length === 4){
+    const dataISO = `${segs[2]}-${segs[1].padStart(2, '0')}-${segs[0].padStart(2, '0')}`;
+    return horaParte ? `${dataISO} ${horaParte.slice(0, 8)}` : dataISO;
+  }
+  return str;
+}
+
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function statusGeral(criacao, execucao){
@@ -155,11 +184,11 @@ async function carregarDoBanco(){
     id: row.id,
     csp: row.csp || '',
     squad: row.esquadrao || '',
-    data: row.data_inicial || '',
+    data: dataParaTela(row.data_inicial) || '',
     criacao: row.criacao_plano || 'Pendente',
     execucao: row.execucao_plano || 'Pendente',
     motivo: row.motivo || '',
-    dataFinal: row.data_final || ''
+    dataFinal: dataParaTela(row.data_final) || ''
   }));
 
   setStatusBadge('Conectado ao Supabase', 'bg-success');
