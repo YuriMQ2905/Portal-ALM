@@ -172,22 +172,20 @@ function chaveData(str){
   const parteData = (str || '').split(',')[0].trim();
   if(!parteData) return '';
 
-  // Formato YYYY-MM-DD ou YYYY/MM/DD
   if(parteData.includes('-')){
     const p = parteData.split('-');
     if(p.length !== 3) return '';
-    return p[0].length === 4 ? `${p[0]}-${p[1]}-${p[2]}` : `${p[2]}-${p[1]}-${p[0]}`;
+    return p[0].length === 4 ? (p[0] + '-' + p[1] + '-' + p[2]) : (p[2] + '-' + p[1] + '-' + p[0]);
   }
 
-  // Formato DD/MM/YYYY ou YYYY/MM/DD
   const p = parteData.split('/');
   if(p.length !== 3) return '';
-  return p[0].length === 4 ? `${p[0]}-${p[1]}-${p[2]}` : `${p[2]}-${p[1]}-${p[0]}`;
+  return p[0].length === 4 ? (p[0] + '-' + p[1] + '-' + p[2]) : (p[2] + '-' + p[1] + '-' + p[0]);
 }
 
 function formatarChave(k){
   const p = k.split('-');
-  return p.length === 3 ? `${p[2]}/${p[1]}` : k;
+  return p.length === 3 ? (p[2] + '/' + p[1]) : k;
 }
 
 function upsertChart(id, config){
@@ -258,179 +256,227 @@ function renderCharts(andamento, finalizado, interrompido){
 
 /* ---------- Tabela e Ações CRUD ---------- */
 
-function opcoes(atual){
-return OPCOES.map(o => <option value="${o}" ${atual === o ? 'selected' : ''}>${o}</option>).join('');
+function criarSelectStatus(atual, index, campo){
+  const sel = document.createElement('select');
+  sel.className = 'form-select form-select-sm';
+  OPCOES.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    if(atual === o) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.onchange = function(){ atualizarCampo(index, campo, this.value); };
+  return sel;
 }
+
 function render(){
-const tbody = document.getElementById('tbody');
-tbody.innerHTML = '';
-let andamento = 0, finalizado = 0, interrompido = 0;
-dados.forEach((item, index) => {
-const st = statusGeral(item.criacao, item.execucao);
-if(st === 'Em Andamento') andamento++;
-else if(st === 'Finalizado') finalizado++;
-else if(st === 'Interrompido') interrompido++;
-const tr = document.createElement('tr');
-tr.innerHTML = `
-${esc(item.csp)}
-${esc(item.squad)}
-${esc(item.data)}
-${opcoes(item.criacao)}
-${opcoes(item.execucao)}
-${badge(st)}
-${esc(item.dataFinal)}
-X
-`;
-tbody.appendChild(tr);
-});
-const total = dados.length;
-document.getElementById('total').textContent = total;
-document.getElementById('andamento').textContent = andamento;
-document.getElementById('finalizado').textContent = finalizado;
-document.getElementById('interrompido').textContent = interrompido;
-document.getElementById('conclusao').textContent = total ? Math.round((finalizado / total) * 100) + '%' : '0%';
-renderCharts(andamento, finalizado, interrompido);
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  let andamento = 0, finalizado = 0, interrompido = 0;
+
+  dados.forEach((item, index) => {
+    const st = statusGeral(item.criacao, item.execucao);
+    if(st === 'Em Andamento') andamento++;
+    else if(st === 'Finalizado') finalizado++;
+    else if(st === 'Interrompido') interrompido++;
+
+    const tr = document.createElement('tr');
+
+    const tdCsp = document.createElement('td');
+    const strong = document.createElement('strong');
+    strong.textContent = item.csp;
+    tdCsp.appendChild(strong);
+
+    const tdSquad = document.createElement('td');
+    tdSquad.textContent = item.squad;
+
+    const tdData = document.createElement('td');
+    tdData.textContent = item.data;
+
+    const tdCriacao = document.createElement('td');
+    tdCriacao.appendChild(criarSelectStatus(item.criacao, index, 'criacao'));
+
+    const tdExecucao = document.createElement('td');
+    tdExecucao.appendChild(criarSelectStatus(item.execucao, index, 'execucao'));
+
+    const tdMotivo = document.createElement('td');
+    const inpMotivo = document.createElement('input');
+    inpMotivo.className = 'form-control form-control-sm';
+    inpMotivo.value = item.motivo || '';
+    inpMotivo.placeholder = 'Motivo...';
+    inpMotivo.onchange = function(){ atualizarCampo(index, 'motivo', this.value); };
+    tdMotivo.appendChild(inpMotivo);
+
+    const tdStatus = document.createElement('td');
+    const spanBadge = document.createElement('span');
+    if(st === 'Interrompido'){
+      spanBadge.className = 'badge bg-danger';
+      spanBadge.textContent = 'INTERROMPIDO';
+    } else if(st === 'Finalizado'){
+      spanBadge.className = 'badge bg-success';
+      spanBadge.textContent = 'FINALIZADO';
+    } else {
+      spanBadge.className = 'badge bg-warning text-dark';
+      spanBadge.textContent = 'EM ANDAMENTO';
+    }
+    tdStatus.appendChild(spanBadge);
+
+    const tdDataFinal = document.createElement('td');
+    tdDataFinal.textContent = item.dataFinal || '';
+
+    const tdExcluir = document.createElement('td');
+    tdExcluir.className = 'text-center';
+    const btnDel = document.createElement('button');
+    btnDel.className = 'btn btn-outline-danger btn-sm btn-delete';
+    btnDel.textContent = 'X';
+    btnDel.onclick = function(){ excluirItem(index); };
+    tdExcluir.appendChild(btnDel);
+
+    tr.appendChild(tdCsp);
+    tr.appendChild(tdSquad);
+    tr.appendChild(tdData);
+    tr.appendChild(tdCriacao);
+    tr.appendChild(tdExecucao);
+    tr.appendChild(tdMotivo);
+    tr.appendChild(tdStatus);
+    tr.appendChild(tdDataFinal);
+    tr.appendChild(tdExcluir);
+
+    tbody.appendChild(tr);
+  });
+
+  const total = dados.length;
+  document.getElementById('total').textContent = total;
+  document.getElementById('andamento').textContent = andamento;
+  document.getElementById('finalizado').textContent = finalizado;
+  document.getElementById('interrompido').textContent = interrompido;
+  document.getElementById('conclusao').textContent = total ? Math.round((finalizado / total) * 100) + '%' : '0%';
+
+  renderCharts(andamento, finalizado, interrompido);
 }
+
 async function addTask(){
-const cspInput = document.getElementById('csp');
-const squadInput = document.getElementById('squad');
-const listaCSPs = cspInput.value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
-const squad = squadInput.value;
-if(!listaCSPs.length || !squad){
-alert('Informe o CSP e selecione a Squad.');
-return;
+  const cspInput = document.getElementById('csp');
+  const squadInput = document.getElementById('squad');
+  const listaCSPs = cspInput.value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+  const squad = squadInput.value;
+
+  if(!listaCSPs.length || !squad){
+    alert('Informe o CSP e selecione a Squad.');
+    return;
+  }
+
+  const agora = new Date().toLocaleString('pt-BR');
+  const novosRegistros = listaCSPs.map(codigo => ({
+    csp: codigo,
+    esquadrao: squad,
+    data_inicial: agora,
+    criacao_plano: 'Pendente',
+    execucao_plano: 'Pendente',
+    motivo: '',
+    status_geral: 'Em Andamento',
+    data_final: ''
+  }));
+
+  setStatusBadge('Salvando...', 'bg-warning text-dark');
+  const { error } = await db.from('csps').insert(novosRegistros);
+
+  if(error){
+    alert('Erro ao salvar no Supabase: ' + error.message);
+    setStatusBadge('Erro ao salvar', 'bg-danger');
+    return;
+  }
+
+  cspInput.value = '';
+  await carregarDoBanco();
 }
-const agora = new Date().toLocaleString('pt-BR');
-const novosRegistros = listaCSPs.map(codigo => ({
-csp: codigo,
-esquadrao: squad,
-data_inicial: agora,
-criacao_plano: 'Pendente',
-execucao_plano: 'Pendente',
-motivo: '',
-status_geral: 'Em Andamento',
-data_final: ''
-}));
-setStatusBadge('Salvando...', 'bg-warning text-dark');
-const { error } = await db.from('csps').insert(novosRegistros);
-if(error){
-alert('Erro ao salvar no Supabase: ' + error.message);
-setStatusBadge('Erro ao salvar', 'bg-danger');
-return;
-}
-cspInput.value = '';
-await carregarDoBanco();
-}
+
 async function atualizarCampo(index, campo, valor){
-const item = dados[index];
-item[campo] = valor;
-const novoStatus = statusGeral(item.criacao, item.execucao);
-if(novoStatus === 'Finalizado'){
-if(!item.dataFinal) item.dataFinal = new Date().toLocaleString('pt-BR');
-} else {
-item.dataFinal = '';
+  const item = dados[index];
+  item[campo] = valor;
+
+  const novoStatus = statusGeral(item.criacao, item.execucao);
+  if(novoStatus === 'Finalizado'){
+    if(!item.dataFinal) item.dataFinal = new Date().toLocaleString('pt-BR');
+  } else {
+    item.dataFinal = '';
+  }
+
+  setStatusBadge('Atualizando...', 'bg-warning text-dark');
+  const { error } = await db
+    .from('csps')
+    .update({
+      criacao_plano: item.criacao,
+      execucao_plano: item.execucao,
+      motivo: item.motivo,
+      status_geral: novoStatus,
+      data_final: item.dataFinal
+    })
+    .eq('id', item.id);
+
+  if(error){
+    alert('Erro ao atualizar no banco: ' + error.message);
+    setStatusBadge('Erro ao atualizar', 'bg-danger');
+    return;
+  }
+
+  setStatusBadge('Conectado ao Supabase', 'bg-success');
+  render();
 }
-setStatusBadge('Atualizando...', 'bg-warning text-dark');
-const { error } = await db
-.from('csps')
-.update({
-criacao_plano: item.criacao,
-execucao_plano: item.execucao,
-motivo: item.motivo,
-status_geral: novoStatus,
-data_final: item.dataFinal
-})
-.eq('id', item.id);
-if(error){
-alert('Erro ao atualizar no banco: ' + error.message);
-setStatusBadge('Erro ao atualizar', 'bg-danger');
-return;
-}
-setStatusBadge('Conectado ao Supabase', 'bg-success');
-render();
-}
+
 async function excluirItem(index){
-const item = dados[index];
-if(!confirm(Deseja realmente excluir o CSP ${item.csp}?)) return;
-setStatusBadge('Excluindo...', 'bg-warning text-dark');
-const { error } = await db.from('csps').delete().eq('id', item.id);
-if(error){
-alert('Erro ao excluir: ' + error.message);
-setStatusBadge('Erro ao excluir', 'bg-danger');
-return;
+  const item = dados[index];
+  if(!confirm('Deseja realmente excluir o CSP ' + item.csp + '?')) return;
+
+  setStatusBadge('Excluindo...', 'bg-warning text-dark');
+  const { error } = await db.from('csps').delete().eq('id', item.id);
+
+  if(error){
+    alert('Erro ao excluir: ' + error.message);
+    setStatusBadge('Erro ao excluir', 'bg-danger');
+    return;
+  }
+
+  await carregarDoBanco();
 }
-await carregarDoBanco();
-}
+
 /* ---------- Importação e Exportação ---------- */
+
 function exportarCSV(){
-const cabecalho = ['CSP;Squad;Data Inicial;Criação Plano;Execução Plano;Motivo;Status Geral;Data Final'];
-const linhas = dados.map(d => ${d.csp};${d.squad};${d.data};${d.criacao};${d.execucao};${d.motivo};${statusGeral(d.criacao, d.execucao)};${d.dataFinal});
-const blob = new Blob(['\uFEFF' + cabecalho.concat(linhas).join('\n')], {type: 'text/csv;charset=utf-8;'});
-const a = document.createElement('a');
-a.href = URL.createObjectURL(blob);
-a.download = 'portal_alm_csps.csv';
-a.click();
+  const cabecalho = ['CSP;Squad;Data Inicial;Criação Plano;Execução Plano;Motivo;Status Geral;Data Final'];
+  const linhas = dados.map(d => [d.csp, d.squad, d.data, d.criacao, d.execucao, d.motivo, statusGeral(d.criacao, d.execucao), d.dataFinal].join(';'));
+  const blob = new Blob(['\uFEFF' + cabecalho.concat(linhas).join('\n')], {type: 'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portal_alm_csps.csv';
+  a.click();
 }
+
 function exportarExcel(){
-if(typeof XLSX === 'undefined') return alert('Biblioteca Excel não carregada.');
-const ws = XLSX.utils.json_to_sheet(dados.map(d => ({
-CSP: d.csp,
-Squad: d.squad,
-'Data Inicial': d.data,
-'Criação Plano': d.criacao,
-'Execução Plano': d.execucao,
-Motivo: d.motivo,
-'Status Geral': statusGeral(d.criacao, d.execucao),
-'Data Final': d.dataFinal
-})));
-const wb = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb, ws, 'CSPs');
-XLSX.writeFile(wb, 'portal_alm_csps.xlsx');
+  if(typeof XLSX === 'undefined') return alert('Biblioteca Excel não carregada.');
+  const ws = XLSX.utils.json_to_sheet(dados.map(d => ({
+    CSP: d.csp,
+    Squad: d.squad,
+    'Data Inicial': d.data,
+    'Criação Plano': d.criacao,
+    'Execução Plano': d.execucao,
+    Motivo: d.motivo,
+    'Status Geral': statusGeral(d.criacao, d.execucao),
+    'Data Final': d.dataFinal
+  })));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'CSPs');
+  XLSX.writeFile(wb, 'portal_alm_csps.xlsx');
 }
+
 function exportarPDF(){
-if(typeof window.jspdf === 'undefined') return alert('Biblioteca PDF não carregada.');
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF('landscape');
-doc.text('Portal ALM - Gestão de Testes', 14, 15);
-doc.autoTable({
-startY: 20,
-head: [['CSP', 'Squad', 'Data Inicial', 'Criação', 'Execução', 'Motivo', 'Status', 'Data Final']],
-body: dados.map(d => [d.csp, d.squad, d.data, d.criacao, d.execucao, d.motivo, statusGeral(d.criacao, d.execucao), d.dataFinal])
-});
-doc.save('portal_alm_csps.pdf');
-}
-async function importarCSV(event){
-const file = event.target.files[0];
-if(!file) return;
-const texto = await file.text();
-const linhas = texto.split(/\r?\n/).slice(1).filter(l => l.trim());
-const registros = linhas.map(l => {
-const c = l.includes(';') ? l.split(';') : l.split(',');
-return {
-csp: (c[0] || '').trim(),
-esquadrao: (c[1] || '').trim(),
-data_inicial: (c[2] || new Date().toLocaleString('pt-BR')).trim(),
-criacao_plano: (c[3] || 'Pendente').trim(),
-execucao_plano: (c[4] || 'Pendente').trim(),
-motivo: (c[5] || '').trim(),
-status_geral: (c[6] || 'Em Andamento').trim(),
-data_final: (c[7] || '').trim()
-};
-}).filter(r => r.csp);
-if(registros.length){
-setStatusBadge('Importando...', 'bg-warning text-dark');
-const { error } = await db.from('csps').insert(registros);
-if(error){
-alert('Erro ao importar CSV: ' + error.message);
-setStatusBadge('Erro ao importar', 'bg-danger');
-} else {
-await carregarDoBanco();
-}
-}
-event.target.value = '';
-}
-// Inicia carregando os dados salvos no Supabase
-carregarDoBanco();
+  if(typeof window.jspdf === 'undefined') return alert('Biblioteca PDF não carregada.');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('landscape');
+  doc.text('Portal ALM - Gestão de Testes', 14, 15);
+  doc.autoTable({
+    startY: 20,
 
   </script>
 </body>
