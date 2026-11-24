@@ -477,7 +477,47 @@ function exportarPDF(){
   doc.text('Portal ALM - Gestão de Testes', 14, 15);
   doc.autoTable({
     startY: 20,
+    head: [['CSP', 'Squad', 'Data Inicial', 'Criação', 'Execução', 'Motivo', 'Status', 'Data Final']],
+    body: dados.map(d => [d.csp, d.squad, d.data, d.criacao, d.execucao, d.motivo, statusGeral(d.criacao, d.execucao), d.dataFinal])
+  });
+  doc.save('portal_alm_csps.pdf');
+}
 
-  </script>
+async function importarCSV(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const texto = await file.text();
+  const linhas = texto.split(/\r?\n/).slice(1).filter(l => l.trim());
+  const registros = linhas.map(l => {
+    const c = l.includes(';') ? l.split(';') : l.split(',');
+    return {
+      csp: (c[0] || '').trim(),
+      esquadrao: (c[1] || '').trim(),
+      data_inicial: (c[2] || new Date().toLocaleString('pt-BR')).trim(),
+      criacao_plano: (c[3] || 'Pendente').trim(),
+      execucao_plano: (c[4] || 'Pendente').trim(),
+      motivo: (c[5] || '').trim(),
+      status_geral: (c[6] || 'Em Andamento').trim(),
+      data_final: (c[7] || '').trim()
+    };
+  }).filter(r => r.csp);
+
+  if(registros.length){
+    setStatusBadge('Importando...', 'bg-warning text-dark');
+    const { error } = await db.from('csps').insert(registros);
+    if(error){
+      alert('Erro ao importar CSV: ' + error.message);
+      setStatusBadge('Erro ao importar', 'bg-danger');
+    } else {
+      await carregarDoBanco();
+    }
+  }
+  event.target.value = '';
+}
+
+// Inicia carregando os dados salvos no Supabase
+carregarDoBanco();
+</script>
 </body>
 </html>
+
