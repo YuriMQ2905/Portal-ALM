@@ -460,7 +460,47 @@ document.getElementById('csp').addEventListener('keydown',function(e){
 
 render();
 
+<script>
+  // 1. Conexão com o seu projeto no Supabase
+  const SUPABASE_URL = 'https://supabase.co';
+  const SUPABASE_KEY = 'COLE_AQUI_A_SUA_SUPABASE_PUBLISHABLE_KEY';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // 2. Busca os dados salvos no banco assim que a página abre
+  async function carregarDados() {
+    const { data, error } = await supabaseClient
+      .from('csps')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao carregar CSPs:', error.message);
+      return;
+    }
+
+    // Aqui entra a função do seu código atual que preenche a tabela e os gráficos na tela
+    renderizarTabela(data); 
+  }
+
+  // 3. Salva uma nova CSP no banco quando você clica no botão Adicionar
+  async function adicionarCSP(dadosDoFormulario) {
+    const { error } = await supabaseClient
+      .from('csps')
+      .insert([dadosDoFormulario]);
+
+    if (error) {
+      alert('Erro ao salvar no banco: ' + error.message);
+      return;
+    }
+
+    carregarDados(); // Recarrega a tabela na tela com o novo registro
+  }
+
+  // Inicia o carregamento ao abrir o site
+  carregarDados();
 </script>
 
+
+  
 </body>
 </html>
