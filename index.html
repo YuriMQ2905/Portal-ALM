@@ -22,477 +22,411 @@
 <body>
 <div class="container-fluid p-4">
 
-<h2 class="mb-3">Portal ALM - Gestão de Testes</h2>
+  <h2 class="mb-3">Portal ALM - Gestão de Testes</h2>
 
-<!-- ================= GESTÃO DE CSPs ================= -->
-
-<div class="row g-3 mb-4">
-  <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Total CSP</h6><h3 id="total">0</h3></div></div></div>
-  <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Em Andamento</h6><h3 id="andamento">0</h3></div></div></div>
-  <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Finalizados</h6><h3 id="finalizado">0</h3></div></div></div>
-  <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Interrompidos</h6><h3 id="interrompido">0</h3></div></div></div>
-  <div class="col"><div class="card card-kpi"><div class="card-body"><h6>% Conclusão</h6><h3 id="conclusao">0%</h3></div></div></div>
-</div>
-
-<div class="card mb-4">
-  <div class="card-header">Novo CSP</div>
-  <div class="card-body">
-
-    <div class="row md-2">
-      <div class="col-md-1">
-        <input id="csp" class="form-control" placeholder="Digite ou cole um ou mais CSPs">
-      </div>
-
-      <div class="col-md-2">
-        <select id="squad" class="form-select">
-          <option value="">Selecione a Squad</option>
-          <option>Cadastro</option>
-          <option>Folha</option>
-          <option>Web</option>
-          <!--
-          <option>Financeiro</option>
-          <option>Portal</option>
-          <option>Integrações</option>
-          <option>DevOps</option>
-          -->
-        </select>
-      </div>
-
-      <div class="col-md-2">
-        <button class="btn btn-primary" onclick="addTask()">Adicionar</button>
-      </div>
-    </div>
-
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover bg-white">
-        <thead class="table-light">
-          <tr>
-            <th>CSP</th>
-            <th>Squad</th>
-            <th>Data Inicial</th>
-            <th>Criação Plano de Teste</th>
-            <th>Execução Plano de Teste</th>
-            <th>Motivo</th>
-            <th>Status Geral</th>
-            <th>Data Final</th>
-            <th width="80">Excluir</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="row g-3 mt-2">
-      <div class="col-lg-4"><div class="card h-100"><div class="card-header">Status Geral</div><div class="card-body"><div class="chart-box"><canvas id="chartStatus"></canvas></div></div></div></div>
-      <div class="col-lg-4"><div class="card h-100"><div class="card-header">Criação x Execução do Plano de Teste</div><div class="card-body"><div class="chart-box"><canvas id="chartEtapas"></canvas></div></div></div></div>
-      <div class="col-lg-4"><div class="card h-100"><div class="card-header">CSPs cadastrados por dia</div><div class="card-body"><div class="chart-box"><canvas id="chartDias"></canvas></div></div></div></div>
-    </div>
-
-    <div class="d-flex justify-content-end align-items-center gap-2 mt-4">
-      <span class="text-muted me-1">Dados:</span>
-      <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('csvImport').click()">Importar CSV</button>
-      <button type="button" class="btn btn-outline-success btn-sm" onclick="exportarExcel()">Excel</button>
-      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportarCSV()">CSV</button>
-      <button type="button" class="btn btn-outline-danger btn-sm" onclick="exportarPDF()">PDF</button>
-      <input type="file" id="csvImport" accept=".csv" style="display:none" onchange="importarCSV(event)">
-    </div>
-
+  <!-- ================= KPIs ================= -->
+  <div class="row g-3 mb-4">
+    <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Total CSP</h6><h3 id="total">0</h3></div></div></div>
+    <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Em Andamento</h6><h3 id="andamento">0</h3></div></div></div>
+    <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Finalizados</h6><h3 id="finalizado">0</h3></div></div></div>
+    <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Interrompidos</h6><h3 id="interrompido">0</h3></div></div></div>
+    <div class="col"><div class="card card-kpi"><div class="card-body"><h6>% Conclusão</h6><h3 id="conclusao">0%</h3></div></div></div>
   </div>
-</div>
+
+  <!-- ================= GESTÃO DE CSPs ================= -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Novo CSP</span>
+      <span id="statusConexao" class="badge bg-secondary">Conectando ao banco...</span>
+    </div>
+    <div class="card-body">
+
+      <div class="row g-2 mb-3">
+        <div class="col-md-3">
+          <input id="csp" class="form-control" placeholder="Digite ou cole um ou mais CSPs">
+        </div>
+
+        <div class="col-md-2">
+          <select id="squad" class="form-select">
+            <option value="">Selecione a Squad</option>
+            <option>Cadastro</option>
+            <option>Folha</option>
+            <option>Web</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100" onclick="addTask()">Adicionar</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white">
+          <thead class="table-light">
+            <tr>
+              <th>CSP</th>
+              <th>Squad</th>
+              <th>Data Inicial</th>
+              <th>Criação Plano de Teste</th>
+              <th>Execução Plano de Teste</th>
+              <th>Motivo</th>
+              <th>Status Geral</th>
+              <th>Data Final</th>
+              <th width="80">Excluir</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- ================= GRÁFICOS ================= -->
+      <div class="row g-3 mt-2">
+        <div class="col-lg-4"><div class="card h-100"><div class="card-header">Status Geral</div><div class="card-body"><div class="chart-box"><canvas id="chartStatus"></canvas></div></div></div></div>
+        <div class="col-lg-4"><div class="card h-100"><div class="card-header">Criação x Execução do Plano de Teste</div><div class="card-body"><div class="chart-box"><canvas id="chartEtapas"></canvas></div></div></div></div>
+        <div class="col-lg-4"><div class="card h-100"><div class="card-header">CSPs cadastrados por dia</div><div class="card-body"><div class="chart-box"><canvas id="chartDias"></canvas></div></div></div></div>
+      </div>
+
+      <!-- ================= IMPORTAÇÃO / EXPORTAÇÃO ================= -->
+      <div class="d-flex justify-content-end align-items-center gap-2 mt-4">
+        <span class="text-muted me-1">Dados:</span>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('csvImport').click()">Importar CSV</button>
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="exportarExcel()">Excel</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportarCSV()">CSV</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" onclick="exportarPDF()">PDF</button>
+        <input type="file" id="csvImport" accept=".csv" style="display:none" onchange="importarCSV(event)">
+      </div>
+
+    </div>
+  </div>
 
 </div>
 
 <script>
+// ================= CONFIGURAÇÃO SUPABASE =================
+const SUPABASE_URL = 'https://supabase.co';
+const SUPABASE_KEY = 'COLE_AQUI_SUA_SUPABASE_PUBLISHABLE_KEY';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let dados = JSON.parse(localStorage.getItem('almDados') || '[]');
-const COR = {pendente:'#ffc107',realizado:'#198754',interrompido:'#dc3545'};
-const OPCOES = ['Pendente','Realizado','Interrompido'];
+let dados = [];
+const COR = {pendente:'#ffc107', realizado:'#198754', interrompido:'#dc3545'};
+const OPCOES = ['Pendente', 'Realizado', 'Interrompido'];
 let charts = {};
 
-// Remove dados da antiga página Plano de Testes (não é mais usada)
-localStorage.removeItem('almPlano');
-localStorage.removeItem('almKey');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function statusGeral(criacao,execucao){
-    if(criacao === 'Interrompido' || execucao === 'Interrompido') return 'Interrompido';
-    if(criacao === 'Realizado' && execucao === 'Realizado') return 'Finalizado';
-    return 'Em Andamento';
+function statusGeral(criacao, execucao){
+  if(criacao === 'Interrompido' || execucao === 'Interrompido') return 'Interrompido';
+  if(criacao === 'Realizado' && execucao === 'Realizado') return 'Finalizado';
+  return 'Em Andamento';
 }
 
 function badge(status){
-    if(status === 'Interrompido') return '<span class="badge bg-danger">INTERROMPIDO</span>';
-    if(status === 'Finalizado') return '<span class="badge bg-success">FINALIZADO</span>';
-    return '<span class="badge bg-warning text-dark">EM ANDAMENTO</span>';
+  if(status === 'Interrompido') return '<span class="badge bg-danger">INTERROMPIDO</span>';
+  if(status === 'Finalizado') return '<span class="badge bg-success">FINALIZADO</span>';
+  return '<span class="badge bg-warning text-dark">EM ANDAMENTO</span>';
 }
 
-function salvar(){ localStorage.setItem('almDados',JSON.stringify(dados)); }
-
-/* Data Final: só existe quando o Status Geral é "Finalizado" */
-function sincronizarDataFinal(item){
-    if(statusGeral(item.criacao,item.execucao) === 'Finalizado'){
-        if(!item.dataFinal) item.dataFinal = new Date().toLocaleString('pt-BR');
-    }else{
-        item.dataFinal = '';
-    }
+function setStatusBadge(texto, classe){
+  const el = document.getElementById('statusConexao');
+  if(el){
+    el.textContent = texto;
+    el.className = 'badge ' + classe;
+  }
 }
 
-/* ---------- Dashboard ---------- */
+/* ---------- Comunicação com o Banco de Dados ---------- */
+
+async function carregarDoBanco(){
+  setStatusBadge('Sincronizando...', 'bg-warning text-dark');
+  const { data, error } = await db
+    .from('csps')
+    .select('*')
+    .order('id', { ascending: true });
+
+  if(error){
+    console.error('Erro ao carregar do Supabase:', error);
+    setStatusBadge('Erro na conexão', 'bg-danger');
+    alert('Erro ao conectar com o Supabase: ' + error.message);
+    return;
+  }
+
+  dados = (data || []).map(row => ({
+    id: row.id,
+    csp: row.csp || '',
+    squad: row.esquadrao || '',
+    data: row.data_inicial || '',
+    criacao: row.criacao_plano || 'Pendente',
+    execucao: row.execucao_plano || 'Pendente',
+    motivo: row.motivo || '',
+    dataFinal: row.data_final || ''
+  }));
+
+  setStatusBadge('Conectado ao Supabase', 'bg-success');
+  render();
+}
+
+/* ---------- Dashboard e Gráficos ---------- */
 
 function chaveData(str){
-    const p = (str || '').split(',')[0].trim().split('/');
+  const parteData = (str || '').split(',')[0].trim();
+  if(!parteData) return '';
+
+  // Formato YYYY-MM-DD ou YYYY/MM/DD
+  if(parteData.includes('-')){
+    const p = parteData.split('-');
     if(p.length !== 3) return '';
-    return p[2] + '-' + p[1] + '-' + p[0];
+    return p[0].length === 4 ? `${p[0]}-${p[1]}-${p[2]}` : `${p[2]}-${p[1]}-${p[0]}`;
+  }
+
+  // Formato DD/MM/YYYY ou YYYY/MM/DD
+  const p = parteData.split('/');
+  if(p.length !== 3) return '';
+  return p[0].length === 4 ? `${p[0]}-${p[1]}-${p[2]}` : `${p[2]}-${p[1]}-${p[0]}`;
 }
 
-function formatarChave(k){ const p = k.split('-'); return p[2] + '/' + p[1]; }
-
-function upsertChart(id,config){
-    if(typeof Chart === 'undefined') return;
-    if(charts[id]){ charts[id].data = config.data; charts[id].update(); return; }
-    charts[id] = new Chart(document.getElementById(id),config);
+function formatarChave(k){
+  const p = k.split('-');
+  return p.length === 3 ? `${p[2]}/${p[1]}` : k;
 }
 
-function renderCharts(andamento,finalizado,interrompido){
-
-    upsertChart('chartStatus',{
-        type:'doughnut',
-        data:{
-            labels:['Em Andamento','Finalizado','Interrompido'],
-            datasets:[{data:[andamento,finalizado,interrompido],backgroundColor:[COR.pendente,COR.realizado,COR.interrompido]}]
-        },
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-    });
-
-    const etapas = ['criacao','execucao'];
-    const conta = (campo,valor) => dados.filter(d => d[campo] === valor).length;
-
-    upsertChart('chartEtapas',{
-        type:'bar',
-        data:{
-            labels:['Criação','Execução'],
-            datasets:[
-                {label:'Pendente',backgroundColor:COR.pendente,data:etapas.map(e => conta(e,'Pendente'))},
-                {label:'Realizado',backgroundColor:COR.realizado,data:etapas.map(e => conta(e,'Realizado'))},
-                {label:'Interrompido',backgroundColor:COR.interrompido,data:etapas.map(e => conta(e,'Interrompido'))}
-            ]
-        },
-        options:{
-            responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{position:'bottom'}},
-            scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}
-        }
-    });
-
-    const porDia = {};
-    dados.forEach(d=>{ const k = chaveData(d.data); if(k) porDia[k] = (porDia[k] || 0) + 1; });
-    const chaves = Object.keys(porDia).sort();
-
-    upsertChart('chartDias',{
-        type:'bar',
-        data:{labels:chaves.map(formatarChave),datasets:[{label:'CSPs',backgroundColor:'#0d6efd',data:chaves.map(k => porDia[k])}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
-    });
+function upsertChart(id, config){
+  if(typeof Chart === 'undefined') return;
+  if(charts[id]){
+    charts[id].data = config.data;
+    charts[id].update();
+    return;
+  }
+  charts[id] = new Chart(document.getElementById(id), config);
 }
 
-/* ---------- Tabela ---------- */
+function renderCharts(andamento, finalizado, interrompido){
+  upsertChart('chartStatus', {
+    type: 'doughnut',
+    data: {
+      labels: ['Em Andamento', 'Finalizado', 'Interrompido'],
+      datasets: [{
+        data: [andamento, finalizado, interrompido],
+        backgroundColor: [COR.pendente, COR.realizado, COR.interrompido]
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {position: 'bottom'}}}
+  });
+
+  const etapas = ['criacao', 'execucao'];
+  const conta = (campo, valor) => dados.filter(d => d[campo] === valor).length;
+
+  upsertChart('chartEtapas', {
+    type: 'bar',
+    data: {
+      labels: ['Criação', 'Execução'],
+      datasets: [
+        {label: 'Pendente', backgroundColor: COR.pendente, data: etapas.map(e => conta(e, 'Pendente'))},
+        {label: 'Realizado', backgroundColor: COR.realizado, data: etapas.map(e => conta(e, 'Realizado'))},
+        {label: 'Interrompido', backgroundColor: COR.interrompido, data: etapas.map(e => conta(e, 'Interrompido'))}
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {legend: {position: 'bottom'}},
+      scales: {x: {stacked: true}, y: {stacked: true, beginAtZero: true, ticks: {precision: 0}}}
+    }
+  });
+
+  const porDia = {};
+  dados.forEach(d => {
+    const k = chaveData(d.data);
+    if(k) porDia[k] = (porDia[k] || 0) + 1;
+  });
+  const chaves = Object.keys(porDia).sort();
+
+  upsertChart('chartDias', {
+    type: 'bar',
+    data: {
+      labels: chaves.map(formatarChave),
+      datasets: [{label: 'CSPs', backgroundColor: '#0d6efd', data: chaves.map(k => porDia[k])}]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {legend: {display: false}},
+      scales: {y: {beginAtZero: true, ticks: {precision: 0}}}
+    }
+  });
+}
+
+/* ---------- Tabela e Ações CRUD ---------- */
 
 function opcoes(atual){
-    return OPCOES.map(o => `<option ${atual===o?'selected':''}>${o}</option>`).join('');
+return OPCOES.map(o => <option value="${o}" ${atual === o ? 'selected' : ''}>${o}</option>).join('');
 }
-
 function render(){
-
-    let tbody = document.getElementById('tbody');
-    tbody.innerHTML = '';
-    let andamento = 0, finalizado = 0, interrompido = 0;
-
-    dados.forEach((item,index)=>{
-
-        let status = statusGeral(item.criacao,item.execucao);
-        if(status === 'Em Andamento') andamento++;
-        if(status === 'Finalizado') finalizado++;
-        if(status === 'Interrompido') interrompido++;
-
-        const dataFinal = status === 'Finalizado' ? (item.dataFinal || '') : '';
-
-        tbody.innerHTML += `
-        <tr>
-            <td>${esc(item.csp)}</td>
-            <td>${esc(item.squad)}</td>
-            <td>${esc(item.data)}</td>
-            <td><select class="form-select" onchange="atualizar(${index},'criacao',this.value)">${opcoes(item.criacao)}</select></td>
-            <td><select class="form-select" onchange="atualizar(${index},'execucao',this.value)">${opcoes(item.execucao)}</select></td>
-            <td><input class="form-control" value="${esc(item.motivo)}" onchange="alterarMotivo(${index},this.value)"></td>
-            <td>${badge(status)}</td>
-            <td>${esc(dataFinal)}</td>
-            <td class="text-center"><button class="btn btn-danger btn-sm btn-delete" onclick="excluir(${index})" title="Excluir CSP">🗑️</button></td>
-        </tr>`;
-    });
-
-    document.getElementById('total').innerText = dados.length;
-    document.getElementById('andamento').innerText = andamento;
-    document.getElementById('finalizado').innerText = finalizado;
-    document.getElementById('interrompido').innerText = interrompido;
-    document.getElementById('conclusao').innerText =
-        (dados.length ? Math.round(finalizado / dados.length * 100) : 0) + '%';
-
-    renderCharts(andamento,finalizado,interrompido);
-    salvar();
-}
-
-function addTask(){
-
-    const texto = document.getElementById('csp').value.trim();
-
-    if(!texto){ alert('Informe pelo menos um CSP.'); return; }
-
-    const csps = texto.split(/[\n,;\t ]+/).filter(x => x.trim() !== '');
-    let duplicados = [];
-
-    csps.forEach(csp=>{
-        csp = csp.trim();
-        const existe = dados.some(item => item.csp.toUpperCase() === csp.toUpperCase());
-        if(existe){ duplicados.push(csp); return; }
-        dados.push({
-            csp:csp,
-            squad:document.getElementById('squad').value,
-            data:new Date().toLocaleString('pt-BR'),
-            criacao:'Pendente',
-            execucao:'Pendente',
-            motivo:'',
-            dataFinal:''
-        });
-    });
-
-    if(duplicados.length > 0){
-        alert('Os seguintes CSPs já estão cadastrados:\n\n' + duplicados.join('\n'));
-    }
-
-    document.getElementById('csp').value = '';
-    document.getElementById('squad').value = '';
-    render();
-}
-
-function atualizar(index,campo,valor){
-    dados[index][campo] = valor;
-    sincronizarDataFinal(dados[index]);
-    if(valor === 'Interrompido' && !dados[index].motivo){
-        alert('Informe o motivo da interrupção.');
-    }
-    render();
-}
-
-function alterarMotivo(index,valor){ dados[index].motivo = valor; render(); }
-
-function excluir(index){
-    if(confirm('Deseja realmente excluir este CSP?')){ dados.splice(index,1); render(); }
-}
-
-/* ---------- Exportação ---------- */
-
-const CABECALHO = ['CSP','Squad','Data Inicial','Criação Plano de Teste','Execução Plano de Teste','Motivo','Status Geral','Data Final'];
-
-function linhasExport(){
-    return dados.map(d => {
-        const st = statusGeral(d.criacao,d.execucao);
-        return [
-            d.csp,
-            d.squad || '',
-            d.data,
-            d.criacao,
-            d.execucao,
-            d.motivo || '',
-            st,
-            st === 'Finalizado' ? (d.dataFinal || '') : ''
-        ];
-    });
-}
-
-function nomeArquivo(ext){
-    const h = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    return 'ALM_CSPs_' + h.getFullYear() + pad(h.getMonth()+1) + pad(h.getDate()) + '.' + ext;
-}
-
-function semDados(){
-    if(dados.length === 0){ alert('Não há dados para exportar.'); return true; }
-    return false;
-}
-
-function exportarExcel(){
-    if(semDados()) return;
-    if(typeof XLSX === 'undefined'){ alert('Biblioteca de Excel não carregada. Verifique a internet.'); return; }
-    const ws = XLSX.utils.aoa_to_sheet([CABECALHO].concat(linhasExport()));
-    ws['!cols'] = [{wch:18},{wch:16},{wch:24},{wch:24},{wch:24},{wch:40},{wch:16},{wch:24}];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'CSPs');
-    XLSX.writeFile(wb,nomeArquivo('xlsx'));
-}
-
-function exportarCSV(){
-    if(semDados()) return;
-    const q = v => '"' + String(v).replace(/"/g,'""') + '"';
-    const csv = [CABECALHO].concat(linhasExport()).map(l => l.map(q).join(';')).join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv],{type:'text/csv;charset=utf-8;'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = nomeArquivo('csv');
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-}
-
-function exportarPDF(){
-    if(semDados()) return;
-    if(!window.jspdf){ alert('Biblioteca de PDF não carregada. Verifique a internet.'); return; }
-    const doc = new window.jspdf.jsPDF({orientation:'landscape'});
-    doc.setFontSize(14);
-    doc.text('Portal ALM - Gestão de Testes',14,14);
-    doc.setFontSize(9);
-    doc.text('Gerado em ' + new Date().toLocaleString('pt-BR') + '  |  Total: ' + dados.length,14,20);
-    doc.autoTable({head:[CABECALHO],body:linhasExport(),startY:25,styles:{fontSize:8},headStyles:{fillColor:[13,110,253]}});
-    doc.save(nomeArquivo('pdf'));
-}
-
-/* ---------- Importação CSV ---------- */
-
-// Divide uma linha CSV (separador ';') respeitando aspas e campos vazios
-function dividirLinha(l){
-    const out = [];
-    let cur = '', asp = false;
-    for(let i = 0; i < l.length; i++){
-        const c = l[i];
-        if(asp){
-            if(c === '"'){
-                if(l[i+1] === '"'){ cur += '"'; i++; }
-                else asp = false;
-            }else cur += c;
-        }else if(c === '"'){
-            asp = true;
-        }else if(c === ';'){
-            out.push(cur); cur = '';
-        }else{
-            cur += c;
-        }
-    }
-    out.push(cur);
-    return out;
-}
-
-function importarCSV(event){
-
-    const arquivo = event.target.files[0];
-    if(!arquivo) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-
-        try{
-
-            const texto = e.target.result.replace(/^\uFEFF/,'');
-            const linhas = texto.split(/\r?\n/).filter(l => l.trim());
-
-            if(linhas.length <= 1){
-                alert('Arquivo CSV vazio.');
-                return;
-            }
-
-            const novosDados = [];
-
-            for(let i = 1; i < linhas.length; i++){
-
-                const c = dividirLinha(linhas[i]).map(x => x.trim());
-
-                if(c.length < 5 || !c[0]) continue;
-
-                const item = {
-                    csp:c[0],
-                    squad:c[1] || '',
-                    data:c[2] || '',
-                    criacao:OPCOES.includes(c[3]) ? c[3] : 'Pendente',
-                    execucao:OPCOES.includes(c[4]) ? c[4] : 'Pendente',
-                    motivo:c[5] || '',
-                    dataFinal:c[7] || ''
-                };
-
-                // Data Final só é mantida se o CSP estiver Finalizado
-                if(statusGeral(item.criacao,item.execucao) !== 'Finalizado') item.dataFinal = '';
-
-                novosDados.push(item);
-            }
-
-            if(novosDados.length === 0){
-                alert('Nenhum registro encontrado no CSV.');
-                return;
-            }
-
-            dados = novosDados;
-            render();
-
-            alert(novosDados.length + ' registros importados com sucesso.');
-
-        }catch(ex){
-            console.error(ex);
-            alert('Erro ao processar o arquivo CSV.');
-        }
-
-        event.target.value = '';
-    };
-
-    reader.readAsText(arquivo,'UTF-8');
-}
-
-document.getElementById('csp').addEventListener('keydown',function(e){
-    if(e.key === 'Enter'){ e.preventDefault(); addTask(); }
+const tbody = document.getElementById('tbody');
+tbody.innerHTML = '';
+let andamento = 0, finalizado = 0, interrompido = 0;
+dados.forEach((item, index) => {
+const st = statusGeral(item.criacao, item.execucao);
+if(st === 'Em Andamento') andamento++;
+else if(st === 'Finalizado') finalizado++;
+else if(st === 'Interrompido') interrompido++;
+const tr = document.createElement('tr');
+tr.innerHTML = `
+${esc(item.csp)}
+${esc(item.squad)}
+${esc(item.data)}
+${opcoes(item.criacao)}
+${opcoes(item.execucao)}
+${badge(st)}
+${esc(item.dataFinal)}
+X
+`;
+tbody.appendChild(tr);
 });
-
+const total = dados.length;
+document.getElementById('total').textContent = total;
+document.getElementById('andamento').textContent = andamento;
+document.getElementById('finalizado').textContent = finalizado;
+document.getElementById('interrompido').textContent = interrompido;
+document.getElementById('conclusao').textContent = total ? Math.round((finalizado / total) * 100) + '%' : '0%';
+renderCharts(andamento, finalizado, interrompido);
+}
+async function addTask(){
+const cspInput = document.getElementById('csp');
+const squadInput = document.getElementById('squad');
+const listaCSPs = cspInput.value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+const squad = squadInput.value;
+if(!listaCSPs.length || !squad){
+alert('Informe o CSP e selecione a Squad.');
+return;
+}
+const agora = new Date().toLocaleString('pt-BR');
+const novosRegistros = listaCSPs.map(codigo => ({
+csp: codigo,
+esquadrao: squad,
+data_inicial: agora,
+criacao_plano: 'Pendente',
+execucao_plano: 'Pendente',
+motivo: '',
+status_geral: 'Em Andamento',
+data_final: ''
+}));
+setStatusBadge('Salvando...', 'bg-warning text-dark');
+const { error } = await db.from('csps').insert(novosRegistros);
+if(error){
+alert('Erro ao salvar no Supabase: ' + error.message);
+setStatusBadge('Erro ao salvar', 'bg-danger');
+return;
+}
+cspInput.value = '';
+await carregarDoBanco();
+}
+async function atualizarCampo(index, campo, valor){
+const item = dados[index];
+item[campo] = valor;
+const novoStatus = statusGeral(item.criacao, item.execucao);
+if(novoStatus === 'Finalizado'){
+if(!item.dataFinal) item.dataFinal = new Date().toLocaleString('pt-BR');
+} else {
+item.dataFinal = '';
+}
+setStatusBadge('Atualizando...', 'bg-warning text-dark');
+const { error } = await db
+.from('csps')
+.update({
+criacao_plano: item.criacao,
+execucao_plano: item.execucao,
+motivo: item.motivo,
+status_geral: novoStatus,
+data_final: item.dataFinal
+})
+.eq('id', item.id);
+if(error){
+alert('Erro ao atualizar no banco: ' + error.message);
+setStatusBadge('Erro ao atualizar', 'bg-danger');
+return;
+}
+setStatusBadge('Conectado ao Supabase', 'bg-success');
 render();
-
-<script>
-  // 1. Conexão com o seu projeto no Supabase
-  const SUPABASE_URL = 'https://supabase.co';
-  const SUPABASE_KEY = 'COLE_AQUI_A_SUA_SUPABASE_PUBLISHABLE_KEY';
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // 2. Busca os dados salvos no banco assim que a página abre
-  async function carregarDados() {
-    const { data, error } = await supabaseClient
-      .from('csps')
-      .select('*')
-      .order('id', { ascending: false });
-
-    if (error) {
-      console.error('Erro ao carregar CSPs:', error.message);
-      return;
-    }
-
-    // Aqui entra a função do seu código atual que preenche a tabela e os gráficos na tela
-    renderizarTabela(data); 
-  }
-
-  // 3. Salva uma nova CSP no banco quando você clica no botão Adicionar
-  async function adicionarCSP(dadosDoFormulario) {
-    const { error } = await supabaseClient
-      .from('csps')
-      .insert([dadosDoFormulario]);
-
-    if (error) {
-      alert('Erro ao salvar no banco: ' + error.message);
-      return;
-    }
-
-    carregarDados(); // Recarrega a tabela na tela com o novo registro
-  }
-
-  // Inicia o carregamento ao abrir o site
-  carregarDados();
-</script>
-
-
-  
-</body>
-</html>
+}
+async function excluirItem(index){
+const item = dados[index];
+if(!confirm(Deseja realmente excluir o CSP ${item.csp}?)) return;
+setStatusBadge('Excluindo...', 'bg-warning text-dark');
+const { error } = await db.from('csps').delete().eq('id', item.id);
+if(error){
+alert('Erro ao excluir: ' + error.message);
+setStatusBadge('Erro ao excluir', 'bg-danger');
+return;
+}
+await carregarDoBanco();
+}
+/* ---------- Importação e Exportação ---------- */
+function exportarCSV(){
+const cabecalho = ['CSP;Squad;Data Inicial;Criação Plano;Execução Plano;Motivo;Status Geral;Data Final'];
+const linhas = dados.map(d => ${d.csp};${d.squad};${d.data};${d.criacao};${d.execucao};${d.motivo};${statusGeral(d.criacao, d.execucao)};${d.dataFinal});
+const blob = new Blob(['\uFEFF' + cabecalho.concat(linhas).join('\n')], {type: 'text/csv;charset=utf-8;'});
+const a = document.createElement('a');
+a.href = URL.createObjectURL(blob);
+a.download = 'portal_alm_csps.csv';
+a.click();
+}
+function exportarExcel(){
+if(typeof XLSX === 'undefined') return alert('Biblioteca Excel não carregada.');
+const ws = XLSX.utils.json_to_sheet(dados.map(d => ({
+CSP: d.csp,
+Squad: d.squad,
+'Data Inicial': d.data,
+'Criação Plano': d.criacao,
+'Execução Plano': d.execucao,
+Motivo: d.motivo,
+'Status Geral': statusGeral(d.criacao, d.execucao),
+'Data Final': d.dataFinal
+})));
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, 'CSPs');
+XLSX.writeFile(wb, 'portal_alm_csps.xlsx');
+}
+function exportarPDF(){
+if(typeof window.jspdf === 'undefined') return alert('Biblioteca PDF não carregada.');
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF('landscape');
+doc.text('Portal ALM - Gestão de Testes', 14, 15);
+doc.autoTable({
+startY: 20,
+head: [['CSP', 'Squad', 'Data Inicial', 'Criação', 'Execução', 'Motivo', 'Status', 'Data Final']],
+body: dados.map(d => [d.csp, d.squad, d.data, d.criacao, d.execucao, d.motivo, statusGeral(d.criacao, d.execucao), d.dataFinal])
+});
+doc.save('portal_alm_csps.pdf');
+}
+async function importarCSV(event){
+const file = event.target.files[0];
+if(!file) return;
+const texto = await file.text();
+const linhas = texto.split(/\r?\n/).slice(1).filter(l => l.trim());
+const registros = linhas.map(l => {
+const c = l.includes(';') ? l.split(';') : l.split(',');
+return {
+csp: (c[0] || '').trim(),
+esquadrao: (c[1] || '').trim(),
+data_inicial: (c[2] || new Date().toLocaleString('pt-BR')).trim(),
+criacao_plano: (c[3] || 'Pendente').trim(),
+execucao_plano: (c[4] || 'Pendente').trim(),
+motivo: (c[5] || '').trim(),
+status_geral: (c[6] || 'Em Andamento').trim(),
+data_final: (c[7] || '').trim()
+};
+}).filter(r => r.csp);
+if(registros.length){
+setStatusBadge('Importando...', 'bg-warning text-dark');
+const { error } = await db.from('csps').insert(registros);
+if(error){
+alert('Erro ao importar CSV: ' + error.message);
+setStatusBadge('Erro ao importar', 'bg-danger');
+} else {
+await carregarDoBanco();
+}
+}
+event.target.value = '';
+}
+// Inicia carregando os dados salvos no Supabase
+carregarDoBanco();
