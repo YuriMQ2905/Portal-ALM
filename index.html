@@ -9,8 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
 body{background:#f4f6f9}
 .card-kpi{border-left:5px solid #0d6efd}
@@ -25,13 +23,7 @@ select{min-width:140px}
 
 <h2 class="mb-3">Portal ALM - Gestão de Testes</h2>
 
-<ul class="nav nav-pills mb-4">
-  <li class="nav-item"><button class="nav-link active" id="tabG" onclick="aba('G')">Gestão de CSPs</button></li>
-  <li class="nav-item"><button class="nav-link" id="tabP" onclick="aba('P')">Plano de Testes</button></li>
-</ul>
-
-<!-- ================= PÁGINA: GESTÃO DE CSPs ================= -->
-<div id="pgG">
+<!-- ================= GESTÃO DE CSPs ================= -->
 
 <div class="row g-3 mb-4">
   <div class="col"><div class="card card-kpi"><div class="card-body"><h6>Total CSP</h6><h3 id="total">0</h3></div></div></div>
@@ -44,166 +36,67 @@ select{min-width:140px}
 <div class="card mb-4">
   <div class="card-header">Novo CSP</div>
   <div class="card-body">
-<div class="row md-2">
 
-  <div class="col-md-1">
-    <input
-        id="csp"
-        class="form-control"
-        placeholder="Digite ou cole um ou mais CSPs">
-  </div>
+    <div class="row md-2">
+      <div class="col-md-1">
+        <input id="csp" class="form-control" placeholder="Digite ou cole um ou mais CSPs">
+      </div>
 
-  <div class="col-md-2">
-    <select
-        id="squad"
-        class="form-select">
-
-        <option value="">
-            Selecione a Squad
-        </option>
-
-        <option>Cadastro</option>
-        <option>Folha</option>
-        <option>Web</option>
-        <!--
-        <option>Financeiro</option>
-        <option>Portal</option>
-        <option>Integrações</option>
-        <option>DevOps</option>
+      <div class="col-md-2">
+        <select id="squad" class="form-select">
+          <option value="">Selecione a Squad</option>
+          <option>Cadastro</option>
+          <option>Folha</option>
+          <option>Web</option>
+          <!--
+          <option>Financeiro</option>
+          <option>Portal</option>
+          <option>Integrações</option>
+          <option>DevOps</option>
           -->
-
-    </select>
-  </div>
-
-  <div class="col-md-2">
-    <button
-        class="btn btn-primary"
-        onclick="addTask()">
-
-        Adicionar
-
-    </button>
-  </div>
-
-</div>
-
-<div class="table-responsive">
-  <table class="table table-bordered table-hover bg-white">
-    <thead class="table-light">
-     <tr>
-
-    <th>CSP</th>
-    <th>Squad</th>
-    <th>Data Inicial</th>
-    <th>Criação Plano de Teste</th><th>Execução Plano de Teste</th>
-        <th>Motivo</th><th>Status Geral</th><th width="80">Excluir</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
-
-<div class="row g-3 mt-2">
-  <div class="col-lg-4"><div class="card h-100"><div class="card-header">Status Geral</div><div class="card-body"><div class="chart-box"><canvas id="chartStatus"></canvas></div></div></div></div>
-  <div class="col-lg-4"><div class="card h-100"><div class="card-header">Criação x Execução do Plano de Teste</div><div class="card-body"><div class="chart-box"><canvas id="chartEtapas"></canvas></div></div></div></div>
-  <div class="col-lg-4"><div class="card h-100"><div class="card-header">CSPs cadastrados por dia</div><div class="card-body"><div class="chart-box"><canvas id="chartDias"></canvas></div></div></div></div>
-</div>
-
-<div class="d-flex justify-content-end align-items-center gap-2 mt-4">
-
-    <span class="text-muted me-1">
-        Dados:
-    </span>
-
-    <button
-        type="button"
-        class="btn btn-outline-primary btn-sm"
-        onclick="document.getElementById('csvImport').click()">
-
-        Importar CSV
-
-    </button>
-
-    <button
-        type="button"
-        class="btn btn-outline-success btn-sm"
-        onclick="exportarExcel()">
-
-        Excel
-
-    </button>
-
-    <button
-        type="button"
-        class="btn btn-outline-secondary btn-sm"
-        onclick="exportarCSV()">
-
-        CSV
-
-    </button>
-
-    <button
-        type="button"
-        class="btn btn-outline-danger btn-sm"
-        onclick="exportarPDF()">
-
-        PDF
-
-    </button>
-
-    <input
-        type="file"
-        id="csvImport"
-        accept=".csv"
-        style="display:none"
-        onchange="importarCSV(event)">
-
-</div>
-
-</div>
-
-<!-- ================= PÁGINA: PLANO DE TESTES ================= -->
-<div id="pgP" class="d-none">
-
-<div class="card mb-4">
-  <div class="card-header">Plano de Testes (padrão iLAB - Step By Step)</div>
-  <div class="card-body">
-    <div class="row g-3">
-      <div class="col-md-5">
-        <label class="form-label fw-semibold">Anexar Documento (requisitos)</label>
-        <input type="file" id="doc" class="form-control" accept=".txt,.md,.docx,.pdf">
-        <div class="form-text">Aceita .docx, .pdf, .txt e .md</div>
+        </select>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">User Story (Parent)</label>
-        <input id="us" class="form-control" placeholder="Ex.: 5632 - Bloqueio das funcionalidades">
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">URL do projeto</label>
-        <input id="url" class="form-control" placeholder="https://urldoprojeto">
-      </div>
-      <div class="col-12">
-        <button class="btn btn-primary" id="btnGerar" onclick="gerarPlano()">Gerar plano de teste</button>
-        <span id="msg" class="ms-2 text-muted"></span>
-        <details class="mt-3">
-          <summary class="text-muted">Opcional: gerar com IA (chave da API Anthropic)</summary>
-          <input id="key" type="password" class="form-control mt-2" style="max-width:420px" placeholder="sk-ant-... (fica salva só neste navegador)">
-          <div class="form-text">Sem chave, o plano é gerado por regras locais (mais simples). Com chave, o texto do documento é enviado à API da Anthropic.</div>
-        </details>
+
+      <div class="col-md-2">
+        <button class="btn btn-primary" onclick="addTask()">Adicionar</button>
       </div>
     </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover bg-white">
+        <thead class="table-light">
+          <tr>
+            <th>CSP</th>
+            <th>Squad</th>
+            <th>Data Inicial</th>
+            <th>Criação Plano de Teste</th>
+            <th>Execução Plano de Teste</th>
+            <th>Motivo</th>
+            <th>Status Geral</th>
+            <th>Data Final</th>
+            <th width="80">Excluir</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-lg-4"><div class="card h-100"><div class="card-header">Status Geral</div><div class="card-body"><div class="chart-box"><canvas id="chartStatus"></canvas></div></div></div></div>
+      <div class="col-lg-4"><div class="card h-100"><div class="card-header">Criação x Execução do Plano de Teste</div><div class="card-body"><div class="chart-box"><canvas id="chartEtapas"></canvas></div></div></div></div>
+      <div class="col-lg-4"><div class="card h-100"><div class="card-header">CSPs cadastrados por dia</div><div class="card-body"><div class="chart-box"><canvas id="chartDias"></canvas></div></div></div></div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center gap-2 mt-4">
+      <span class="text-muted me-1">Dados:</span>
+      <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('csvImport').click()">Importar CSV</button>
+      <button type="button" class="btn btn-outline-success btn-sm" onclick="exportarExcel()">Excel</button>
+      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportarCSV()">CSV</button>
+      <button type="button" class="btn btn-outline-danger btn-sm" onclick="exportarPDF()">PDF</button>
+      <input type="file" id="csvImport" accept=".csv" style="display:none" onchange="importarCSV(event)">
+    </div>
+
   </div>
-</div>
-
-<div id="plano"></div>
-
-<div id="exp" class="d-none d-flex justify-content-end align-items-center gap-2 mt-3">
-  <span class="text-muted me-1">Exportar plano:</span>
-  <button class="btn btn-outline-primary btn-sm" onclick="planoAzure()" title="CSV para importar no Azure DevOps">CSV Azure DevOps</button>
-  <button class="btn btn-outline-success btn-sm" onclick="planoExcel()">Excel</button>
-  <button class="btn btn-outline-danger btn-sm" onclick="planoPDF()">PDF</button>
-</div>
-
 </div>
 
 </div>
@@ -212,14 +105,14 @@ select{min-width:140px}
 
 let dados = JSON.parse(localStorage.getItem('almDados') || '[]');
 const COR = {pendente:'#ffc107',realizado:'#198754',interrompido:'#dc3545'};
+const OPCOES = ['Pendente','Realizado','Interrompido'];
 let charts = {};
 
-function aba(x){
-    ['G','P'].forEach(k=>{
-        document.getElementById('pg'+k).classList.toggle('d-none',k!==x);
-        document.getElementById('tab'+k).classList.toggle('active',k===x);
-    });
-}
+// Remove dados da antiga página Plano de Testes (não é mais usada)
+localStorage.removeItem('almPlano');
+localStorage.removeItem('almKey');
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function statusGeral(criacao,execucao){
     if(criacao === 'Interrompido' || execucao === 'Interrompido') return 'Interrompido';
@@ -234,6 +127,15 @@ function badge(status){
 }
 
 function salvar(){ localStorage.setItem('almDados',JSON.stringify(dados)); }
+
+/* Data Final: só existe quando o Status Geral é "Finalizado" */
+function sincronizarDataFinal(item){
+    if(statusGeral(item.criacao,item.execucao) === 'Finalizado'){
+        if(!item.dataFinal) item.dataFinal = new Date().toLocaleString('pt-BR');
+    }else{
+        item.dataFinal = '';
+    }
+}
 
 /* ---------- Dashboard ---------- */
 
@@ -296,8 +198,7 @@ function renderCharts(andamento,finalizado,interrompido){
 /* ---------- Tabela ---------- */
 
 function opcoes(atual){
-    return ['Pendente','Realizado','Interrompido']
-        .map(o => `<option ${atual===o?'selected':''}>${o}</option>`).join('');
+    return OPCOES.map(o => `<option ${atual===o?'selected':''}>${o}</option>`).join('');
 }
 
 function render(){
@@ -313,15 +214,18 @@ function render(){
         if(status === 'Finalizado') finalizado++;
         if(status === 'Interrompido') interrompido++;
 
+        const dataFinal = status === 'Finalizado' ? (item.dataFinal || '') : '';
+
         tbody.innerHTML += `
         <tr>
-          <td>${item.csp}</td>
-    <td>${item.squad || ''}</td>
-    <td>${item.data}</td>
+            <td>${esc(item.csp)}</td>
+            <td>${esc(item.squad)}</td>
+            <td>${esc(item.data)}</td>
             <td><select class="form-select" onchange="atualizar(${index},'criacao',this.value)">${opcoes(item.criacao)}</select></td>
             <td><select class="form-select" onchange="atualizar(${index},'execucao',this.value)">${opcoes(item.execucao)}</select></td>
-            <td><input class="form-control" value="${item.motivo || ''}" onchange="alterarMotivo(${index},this.value)"></td>
+            <td><input class="form-control" value="${esc(item.motivo)}" onchange="alterarMotivo(${index},this.value)"></td>
             <td>${badge(status)}</td>
+            <td>${esc(dataFinal)}</td>
             <td class="text-center"><button class="btn btn-danger btn-sm btn-delete" onclick="excluir(${index})" title="Excluir CSP">🗑️</button></td>
         </tr>`;
     });
@@ -350,38 +254,29 @@ function addTask(){
         csp = csp.trim();
         const existe = dados.some(item => item.csp.toUpperCase() === csp.toUpperCase());
         if(existe){ duplicados.push(csp); return; }
-      dados.push({
-
-    csp:csp,
-
-    squad:
-        document
-        .getElementById('squad')
-        .value,
-
-    data:
-        new Date()
-        .toLocaleString('pt-BR'),
-
-    criacao:'Pendente',
-
-    execucao:'Pendente',
-
-    motivo:''
-      });
+        dados.push({
+            csp:csp,
+            squad:document.getElementById('squad').value,
+            data:new Date().toLocaleString('pt-BR'),
+            criacao:'Pendente',
+            execucao:'Pendente',
+            motivo:'',
+            dataFinal:''
+        });
     });
 
     if(duplicados.length > 0){
         alert('Os seguintes CSPs já estão cadastrados:\n\n' + duplicados.join('\n'));
     }
 
-   document.getElementById('csp').value='';
-document.getElementById('squad').value='';
+    document.getElementById('csp').value = '';
+    document.getElementById('squad').value = '';
     render();
 }
 
 function atualizar(index,campo,valor){
     dados[index][campo] = valor;
+    sincronizarDataFinal(dados[index]);
     if(valor === 'Interrompido' && !dados[index].motivo){
         alert('Informe o motivo da interrupção.');
     }
@@ -394,28 +289,24 @@ function excluir(index){
     if(confirm('Deseja realmente excluir este CSP?')){ dados.splice(index,1); render(); }
 }
 
-/* ---------- Exportação (CSPs) ---------- */
+/* ---------- Exportação ---------- */
 
-const CABECALHO = ['CSP','Data Inicial', 'Squad', 'Criação Plano de Teste','Execução Plano de Teste','Motivo','Status Geral'];
+const CABECALHO = ['CSP','Squad','Data Inicial','Criação Plano de Teste','Execução Plano de Teste','Motivo','Status Geral','Data Final'];
 
 function linhasExport(){
-    return dados.map(d => [
-
-    d.csp,
-
-    d.squad || '',
-
-    d.data,
-
-    d.criacao,
-
-    d.execucao,
-
-    d.motivo || '',
-
-    statusGeral(
-        d.criacao,
-        d.execucao)]);
+    return dados.map(d => {
+        const st = statusGeral(d.criacao,d.execucao);
+        return [
+            d.csp,
+            d.squad || '',
+            d.data,
+            d.criacao,
+            d.execucao,
+            d.motivo || '',
+            st,
+            st === 'Finalizado' ? (d.dataFinal || '') : ''
+        ];
+    });
 }
 
 function nomeArquivo(ext){
@@ -433,7 +324,7 @@ function exportarExcel(){
     if(semDados()) return;
     if(typeof XLSX === 'undefined'){ alert('Biblioteca de Excel não carregada. Verifique a internet.'); return; }
     const ws = XLSX.utils.aoa_to_sheet([CABECALHO].concat(linhasExport()));
-    ws['!cols'] = [{wch:18},{wch:20},{wch:24},{wch:24},{wch:40},{wch:16}];
+    ws['!cols'] = [{wch:18},{wch:16},{wch:24},{wch:24},{wch:24},{wch:40},{wch:16},{wch:24}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,'CSPs');
     XLSX.writeFile(wb,nomeArquivo('xlsx'));
@@ -441,8 +332,8 @@ function exportarExcel(){
 
 function exportarCSV(){
     if(semDados()) return;
-    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
-    const csv = [CABECALHO].concat(linhasExport()).map(l => l.map(esc).join(';')).join('\r\n');
+    const q = v => '"' + String(v).replace(/"/g,'""') + '"';
+    const csv = [CABECALHO].concat(linhasExport()).map(l => l.map(q).join(';')).join('\r\n');
     const blob = new Blob(['\uFEFF' + csv],{type:'text/csv;charset=utf-8;'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -465,13 +356,35 @@ function exportarPDF(){
     doc.save(nomeArquivo('pdf'));
 }
 
+/* ---------- Importação CSV ---------- */
+
+// Divide uma linha CSV (separador ';') respeitando aspas e campos vazios
+function dividirLinha(l){
+    const out = [];
+    let cur = '', asp = false;
+    for(let i = 0; i < l.length; i++){
+        const c = l[i];
+        if(asp){
+            if(c === '"'){
+                if(l[i+1] === '"'){ cur += '"'; i++; }
+                else asp = false;
+            }else cur += c;
+        }else if(c === '"'){
+            asp = true;
+        }else if(c === ';'){
+            out.push(cur); cur = '';
+        }else{
+            cur += c;
+        }
+    }
+    out.push(cur);
+    return out;
+}
+
 function importarCSV(event){
 
     const arquivo = event.target.files[0];
-
-    if(!arquivo){
-        return;
-    }
+    if(!arquivo) return;
 
     const reader = new FileReader();
 
@@ -479,18 +392,11 @@ function importarCSV(event){
 
         try{
 
-            const texto =
-                e.target.result
-                .replace(/^\uFEFF/,'');
-
-            const linhas =
-                texto.split(/\r?\n/)
-                .filter(l => l.trim());
+            const texto = e.target.result.replace(/^\uFEFF/,'');
+            const linhas = texto.split(/\r?\n/).filter(l => l.trim());
 
             if(linhas.length <= 1){
-
                 alert('Arquivo CSV vazio.');
-
                 return;
             }
 
@@ -498,379 +404,51 @@ function importarCSV(event){
 
             for(let i = 1; i < linhas.length; i++){
 
-                const linha = linhas[i];
+                const c = dividirLinha(linhas[i]).map(x => x.trim());
 
-                const partes =
-                    linha.match(
-                        /("([^"]|"")*"|[^;]+)/g
-                    );
+                if(c.length < 5 || !c[0]) continue;
 
-                if(!partes){
-                    continue;
-                }
+                const item = {
+                    csp:c[0],
+                    squad:c[1] || '',
+                    data:c[2] || '',
+                    criacao:OPCOES.includes(c[3]) ? c[3] : 'Pendente',
+                    execucao:OPCOES.includes(c[4]) ? c[4] : 'Pendente',
+                    motivo:c[5] || '',
+                    dataFinal:c[7] || ''
+                };
 
-                const colunas = partes.map(c =>
-                    c.replace(/^"/,'')
-                     .replace(/"$/,'')
-                     .replace(/""/g,'"')
-                );
+                // Data Final só é mantida se o CSP estiver Finalizado
+                if(statusGeral(item.criacao,item.execucao) !== 'Finalizado') item.dataFinal = '';
 
-                if(colunas.length < 5){
-                    continue;
-                }
-
-                novosDados.push({
-
-                        csp: colunas[0],
-
-    squad: colunas[1],
-
-    data: colunas[2],
-
-    criacao: colunas[3],
-
-    execucao: colunas[4],
-
-    motivo: colunas[5]
-
-                });
-
+                novosDados.push(item);
             }
 
             if(novosDados.length === 0){
-
-                alert(
-                    'Nenhum registro encontrado no CSV.'
-                );
-
+                alert('Nenhum registro encontrado no CSV.');
                 return;
             }
 
             dados = novosDados;
-
-            salvar();
-
             render();
 
-            alert(
-                novosDados.length +
-                ' registros importados com sucesso.'
-            );
+            alert(novosDados.length + ' registros importados com sucesso.');
 
-        }
-        catch(ex){
-
+        }catch(ex){
             console.error(ex);
-
-            alert(
-                'Erro ao processar o arquivo CSV.'
-            );
-
+            alert('Erro ao processar o arquivo CSV.');
         }
 
+        event.target.value = '';
     };
 
-    reader.readAsText(
-        arquivo,
-        'UTF-8'
-    );
-
+    reader.readAsText(arquivo,'UTF-8');
 }
+
 document.getElementById('csp').addEventListener('keydown',function(e){
     if(e.key === 'Enter'){ e.preventDefault(); addTask(); }
 });
 
-/* =====================================================
-   PLANO DE TESTES  (padrão iLAB - Step By Step)
-   - Título começa com "Validar"
-   - Prioridade 1 a 4
-   - Pré-condição (campo Summary) + step 1 "*Ver Summary"
-   - Steps iniciando com verbo no infinitivo
-   - 1 único resultado esperado, no presente e afirmativo
-   ===================================================== */
-
-const MODELO = 'claude-sonnet-5-5';
-let plano = JSON.parse(localStorage.getItem('almPlano') || 'null');
-
-const $ = id => document.getElementById(id);
-const val = id => $(id).value.trim();
-const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const q = v => '"' + String(v).replace(/"/g,'""') + '"';
-const lf = s => s.charAt(0).toLowerCase() + s.slice(1);
-const cut = (s,n) => s.length > n ? s.slice(0,n-1).trim() + '…' : s;
-const PRI = {1:['Alta','danger'],2:['Média','warning text-dark'],3:['Baixa','info text-dark'],4:['Mínima','secondary']};
-
-async function lerDoc(f){
-    const n = f.name.toLowerCase();
-    const b = await f.arrayBuffer();
-
-    if(n.endsWith('.docx')){
-        if(typeof mammoth === 'undefined') throw Error('Biblioteca DOCX não carregada. Verifique a internet.');
-        return (await mammoth.extractRawText({arrayBuffer:b})).value;
-    }
-
-    if(n.endsWith('.pdf')){
-        if(typeof pdfjsLib === 'undefined') throw Error('Biblioteca PDF não carregada. Verifique a internet.');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-        const pdf = await pdfjsLib.getDocument({data:b}).promise;
-        let t = '';
-        for(let i = 1; i <= pdf.numPages; i++){
-            const c = await (await pdf.getPage(i)).getTextContent();
-            t += c.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('') + '\n';
-        }
-        return t;
-    }
-
-    return new TextDecoder().decode(b);
-}
-
-/* ---------- Gerador local (regras) ---------- */
-
-function presente(v){
-    v = v.toLowerCase();
-    const f = {ser:'é',ter:'tem',estar:'está',poder:'pode'};
-    return f[v] || v.replace(/ar$/,'a').replace(/(er|ir)$/,'e');
-}
-
-function esperado(r){
-    const m = r.match(/\b(?:deve(?:m|rá|rão)?|poder[áa]|pode)\s+(\w+?(?:ar|er|ir))\b\s*(.*)/i);
-    if(m && !/^(ser|estar)$/i.test(m[1])){
-        return 'Sistema ' + presente(m[1]) + ' ' + cut(m[2].replace(/[.;:]+$/,''),140);
-    }
-    return 'Sistema atende ao requisito: ' + cut(r,140);
-}
-
-function gerarLocal(txt,url){
-
-    const reqs = txt
-        .split(/\n+|(?<=[.;])\s+/)
-        .map(s => s.replace(/^[\s\-•*\d.)]+/,'').trim())
-        .filter(s => s.length > 25 && /dev[ea]|poder|permit|obrigat|n[ãa]o\s|bloque|valid|exib|apresent|mensagem|perfil|campo|bot[ãa]o/i.test(s))
-        .slice(0,30);
-
-    const casos = [];
-    const pre = 'Usuário deve possuir acesso ao ambiente e perfil compatível com o requisito; massa de dados disponível.';
-
-    const add = (t,p,passos,res) => casos.push({
-        id:'CT' + String(casos.length + 1).padStart(2,'0'),
-        titulo:cut(t,150),
-        prioridade:p,
-        pre:pre,
-        steps:passos.map((a,i) => ({a:a,e:i === passos.length - 1 ? res : ''}))
-    });
-
-    reqs.forEach(r=>{
-
-        const base = [
-            '*Ver Summary – Acessar a url do projeto: ' + url,
-            'Realizar login com usuário válido',
-            'Acessar a funcionalidade relacionada ao requisito: ' + cut(r,110)
-        ];
-
-        add('Validar que o ' + lf(esperado(r)),
-            /opcional|desej[áa]vel/i.test(r) ? 3 : 1,
-            base.concat(['Executar o fluxo principal descrito no requisito']),
-            esperado(r));
-
-        if(/obrigat|inv[áa]lid|n[ãa]o\s+(dev|pod|perm)|bloque|impedi|limit|m[áa]xim|m[íi]nim|restri/i.test(r)){
-            add('Validar tratamento de fluxo negativo: ' + lf(cut(r,100)),2,
-                base.concat(['Executar o fluxo com dados inválidos ou fora da regra descrita']),
-                'Sistema bloqueia a ação e exibe mensagem de crítica conforme o requisito');
-        }
-
-        if(/mensagem|texto|layout|r[óo]tulo|campo|bot[ãa]o|formato/i.test(r)){
-            add('Validar textos, campos e layout: ' + lf(cut(r,100)),4,
-                base.concat(['Verificar textos, campos e posicionamento dos elementos na tela']),
-                'Sistema apresenta textos, campos e layout conforme o requisito');
-        }
-    });
-
-    return casos;
-}
-
-/* ---------- Gerador com IA (opcional) ---------- */
-
-const SYS = `Você é analista de QA sênior e escreve casos de teste no padrão iLAB (Azure DevOps, Step By Step).
-Regras:
-- Título: começa com "Validar", objetivo, informando O QUE é validado e ONDE (ex.: "Validar exclusão por óbito no menu Autoatendimento > Recadastramento").
-- Prioridade: 1 = Alta (fluxo principal, regras críticas); 2 = Média (fluxos negativos/alternativos); 3 = Baixa (fluxos de exceção, requisitos desejáveis); 4 = Mínima (textos, ortografia, layout, formato de dados).
-- Pré-condição: o que deve ocorrer antes da execução (acessos, massa, perfil). Quando houver, o primeiro step começa com "*Ver Summary – ".
-- Steps: claros, detalhados, cada um iniciando com verbo no infinitivo (Acessar, Clicar, Preencher, Selecionar...). Todo caso deve ser autossuficiente (URL, login/perfil, menus).
-- Resultado esperado: UM único por caso, no último step, verbo no presente e afirmativo ("Sistema apresenta...", nunca "deve retornar"). Demais steps com esperado vazio.
-- Cubra fluxo principal, negativos/alternativos, exceção e layout/textos quando o requisito permitir. Não invente regras que não estejam nos requisitos.
-Responda SOMENTE com JSON, sem markdown: {"casos":[{"titulo":"","prioridade":1,"pre":"","steps":[{"acao":"","esperado":""}]}]}`;
-
-async function gerarIA(txt,url,key){
-
-    const r = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{
-            'content-type':'application/json',
-            'x-api-key':key,
-            'anthropic-version':'2023-06-01',
-            'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body:JSON.stringify({
-            model:MODELO,
-            max_tokens:8000,
-            system:SYS,
-            messages:[{role:'user',content:'URL do projeto: ' + url + '\n\nREQUISITOS:\n' + txt.slice(0,60000)}]
-        })
-    });
-
-    const j = await r.json();
-    if(!r.ok) throw Error((j.error && j.error.message) || r.status);
-
-    const t = j.content.map(c => c.text || '').join('').replace(/```json|```/g,'').trim();
-
-    return JSON.parse(t).casos.map((c,i) => ({
-        id:'CT' + String(i + 1).padStart(2,'0'),
-        titulo:c.titulo,
-        prioridade:c.prioridade,
-        pre:c.pre,
-        steps:c.steps.map(s => ({a:s.acao,e:s.esperado || ''}))
-    }));
-}
-
-/* ---------- Geração e exibição ---------- */
-
-async function gerarPlano(){
-
-    const f = $('doc').files[0];
-    if(!f){ alert('Anexe o documento de requisitos.'); return; }
-
-    const btn = $('btnGerar'), msg = $('msg');
-    btn.disabled = true;
-    msg.textContent = 'Lendo documento...';
-
-    try{
-        const txt = await lerDoc(f);
-        if(txt.trim().length < 30) throw Error('Não foi possível extrair texto do documento.');
-
-        const url = val('url') || 'https://urldoprojeto';
-        const key = val('key');
-        localStorage.setItem('almKey',key);
-
-        let casos = null, modo = 'Regras locais';
-
-        if(key){
-            msg.textContent = 'Gerando plano com IA...';
-            try{ casos = await gerarIA(txt,url,key); modo = 'IA'; }
-            catch(e){ msg.textContent = 'IA indisponível (' + e.message + '). Usando regras locais...'; }
-        }
-
-        if(!casos) casos = gerarLocal(txt,url);
-        if(!casos.length) throw Error('Nenhum requisito identificado no documento.');
-
-        plano = {
-            nome:'Plano de Testes - ' + f.name.replace(/\.[^.]+$/,''),
-            data:new Date().toLocaleString('pt-BR'),
-            us:val('us'),
-            modo:modo,
-            casos:casos
-        };
-
-        localStorage.setItem('almPlano',JSON.stringify(plano));
-        renderPlano();
-        msg.textContent = '';
-
-    }catch(e){
-        msg.textContent = '';
-        alert(e.message);
-    }
-
-    btn.disabled = false;
-}
-
-function renderPlano(){
-
-    const box = $('plano'), ex = $('exp');
-
-    if(!plano){ box.innerHTML = ''; ex.classList.add('d-none'); return; }
-
-    ex.classList.remove('d-none');
-
-    box.innerHTML =
-        `<div class="alert alert-light border"><b>${esc(plano.nome)}</b><br>
-        <small class="text-muted">Gerado em ${esc(plano.data)} · ${esc(plano.modo)} · ${plano.casos.length} casos de teste${plano.us ? ' · User Story (Parent): ' + esc(plano.us) : ''}</small></div>` +
-        plano.casos.map(c => {
-            const p = PRI[c.prioridade] || PRI[3];
-            return `
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><b>${esc(c.id)}</b> – ${esc(c.titulo)}</span>
-                    <span class="badge bg-${p[1]}">Prioridade ${esc(c.prioridade)} – ${p[0]}</span>
-                </div>
-                <div class="card-body">
-                    <p class="mb-2"><b>Pré-condição (Summary):</b> ${esc(c.pre)}</p>
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead class="table-light"><tr><th width="50">#</th><th>Ação (Step)</th><th>Resultado esperado</th></tr></thead>
-                        <tbody>${c.steps.map((s,i) => `<tr><td>${i + 1}</td><td>${esc(s.a)}</td><td>${esc(s.e)}</td></tr>`).join('')}</tbody>
-                    </table>
-                </div>
-            </div>`;
-        }).join('');
-}
-
-/* ---------- Exportação do plano ---------- */
-
-const CAB_PLANO = ['ID','Título','Prioridade','Pré-condição (Summary)','Step','Ação','Resultado esperado','User Story (Parent)'];
-
-function linhasPlano(){
-    const r = [];
-    plano.casos.forEach(c => c.steps.forEach((s,i) =>
-        r.push([i ? '' : c.id,i ? '' : c.titulo,i ? '' : c.prioridade,i ? '' : c.pre,i + 1,s.a,s.e,i ? '' : plano.us])
-    ));
-    return r;
-}
-
-function nomePlano(ext){ return nomeArquivo(ext).replace('CSPs','PlanoTeste'); }
-
-function baixar(c,n,t){
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([c],{type:t}));
-    a.download = n;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href),1000);
-}
-
-function planoAzure(){
-    if(!plano) return;
-    // Formato de importação de Test Cases do Azure DevOps (colunas padrão)
-    const rows = [['ID','Work Item Type','Title','Test Step','Step Action','Step Expected','Priority','State','Summary']];
-    plano.casos.forEach(c => {
-        rows.push(['','Test Case',c.titulo,'','','',c.prioridade,'Design',c.pre]);
-        c.steps.forEach((s,i) => rows.push(['','','',i + 1,s.a,s.e,'','','']));
-    });
-    baixar('\uFEFF' + rows.map(l => l.map(q).join(',')).join('\r\n'),nomePlano('csv'),'text/csv;charset=utf-8;');
-}
-
-function planoExcel(){
-    if(!plano) return;
-    if(typeof XLSX === 'undefined'){ alert('Biblioteca de Excel não carregada. Verifique a internet.'); return; }
-    const ws = XLSX.utils.aoa_to_sheet([CAB_PLANO].concat(linhasPlano()));
-    ws['!cols'] = [{wch:8},{wch:50},{wch:10},{wch:40},{wch:6},{wch:50},{wch:50},{wch:24}];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Plano de Testes');
-    XLSX.writeFile(wb,nomePlano('xlsx'));
-}
-
-function planoPDF(){
-    if(!plano) return;
-    if(!window.jspdf){ alert('Biblioteca de PDF não carregada. Verifique a internet.'); return; }
-    const doc = new window.jspdf.jsPDF({orientation:'landscape'});
-    doc.setFontSize(14);
-    doc.text(plano.nome,14,14);
-    doc.setFontSize(9);
-    doc.text('Gerado em ' + plano.data + '  |  Casos: ' + plano.casos.length,14,20);
-    doc.autoTable({head:[CAB_PLANO],body:linhasPlano(),startY:25,styles:{fontSize:7},headStyles:{fillColor:[13,110,253]}});
-    doc.save(nomePlano('pdf'));
-}
-
-$('key').value = localStorage.getItem('almKey') || '';
-renderPlano();
 render();
 
 </script>
